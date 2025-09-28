@@ -22,16 +22,28 @@ ranking_trilhas(RankingOrdenado) :-
         Pares),
     sort(2, @>=, Pares, RankingOrdenado).
 
-%imprime bloco de relatório para um perfil
+% O predicado 'relatorio_perfil' gera o relatório final.
 relatorio_perfil(ArquivoPerfil) :-
+    % Carrega o arquivo de perfil.
     carrega_perfil(ArquivoPerfil),
+    
+    % Obtém o ranking de todas as trilhas.
     ranking_trilhas(Rank),
-    format('~n-˜-˜-˜- RESULTADO para ~w -˜-˜-˜-\n', [ArquivoPerfil]),
+    
+    % Imprime o cabeçalho e o ranking.
+    format('~n--- RESULTADO para ~w ---\n', [ArquivoPerfil]),
     writeln('Ranking (alto -> baixo):'),
     forall(member(T-P, Rank), format(' - ~w: ~w pontos\n', [T,P])),
-    (   recomenda_trilha(TrilhasTop)
-    ->  format('Recomendacao: ~w\n', [TrilhasTop])
-    ;   writeln('Recomendacao: [nenhuma encontrada]')
+    
+    % Verifica se existe uma recomendação.
+    (   recomenda_melhor_trilha(Trilha, Descricao, _, Justificativas)
+    ->  (   % Se sim, imprime a recomendação e suas justificativas.
+            format('Recomendacao: ~w - ~w\n', [Trilha, Descricao]),
+            writeln('Justificativas:'),
+            forall(member(J, Justificativas), format(' - ~w\n', [J]))
+        )
+    ;   % Se não, imprime uma mensagem padrão.
+        writeln('Recomendacao: [nenhuma encontrada]')
     ).
 
 %tds os perfis
