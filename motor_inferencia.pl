@@ -11,37 +11,42 @@ calcula_ponto_perfil(Caracteristica, 0) :-
     resposta(ID, n).                 % Com o ID da pergunta vemos que a resposta é não então irá ser somado 0
 
 %Calcular o total de pontos de cada trilha
-calcula_total_pontos(Trilha, PontuacaoTotal) :-
-    findall(Pontos, % Defino o que quero encontrar
-            (perfil(Trilha, Caracteristica, _), % Procuro todas as caracteristicas de cada trilha
-            calcula_ponto_perfil(Caracteristica, Pontos)), % Chamo o predicado que preenche a lista com pontos baseados nas respostas do usuário
-            ListaDePontos), % Onde irei guardar meus pontos nesta lista
-    sumlist(ListaDePontos, PontuacaoTotal). % Soma todos os elementos da lista e retorna em PontuacaoTotal
+% O predicado 'pontuacao_trilha' calcula a pontuação total e
+% coleta as justificativas para uma trilha específica.
+pontuacao_trilha(NomeTrilha, PontuacaoTotal, Justificativas) :-
+    % 1. Calcula a pontuação total da trilha.
+    % Coleta a pontuação de cada habilidade...
+    findall(Pontos,
+            ( perfil(NomeTrilha, Habilidade, _),
+              calcula_ponto_perfil(Habilidade, Pontos) 
+            ),
+            ListaPontos),
+    % ...e soma os pontos da lista para obter o total.
+    sumlist(ListaPontos, PontuacaoTotal),
+    
+    % 2. Coleta as justificativas.
+    % Encontra e lista o texto das perguntas que tiveram pontuação maior que 0.
+    findall(TextoPergunta,
+            ( perfil(NomeTrilha, Habilidade, _),
+              pergunta(_, TextoPergunta, Habilidade),
+              calcula_ponto_perfil(Habilidade, Pontos),
+              Pontos > 0
+            ),
+            Justificativas).
 
-% Primeiro vou encontrar a pontuacao maxima:
-encontra_pontuacao_maxima(PontuacaoMaxima) :-
-    findall(PontuacaoTotal,
-            (trilha(Trilha, _), % Para cada trilha que encontrar
-             calcula_total_pontos(Trilha, PontuacaoTotal)), % Pega o total de pontos desta trilha
-            ListaPontosTrilhas), % Armazena numa lista o total dos pontos encontrados
-    max_list(ListaPontosTrilhas, PontuacaoMaxima). % Encontra a pontuação máxima na lista
-
-% Predicado que lista todas as pontuações (ajuda no debug)
-listar_todas_pontuacoes(Lista) :-
-    findall(Trilha-Pontos,
-            (trilha(Trilha,_),
-             calcula_total_pontos(Trilha, Pontos)),
-            Lista).
-
-% Auxiliar para extrair a maior pontuação da lista
-max_lista_pontuacoes(Lista, Max) :-
-    findall(P, member(_-P, Lista), Pontuacoes),
-    max_list(Pontuacoes, Max).
-
-% Agora irei ver qual trilha é recomendada para o usuário
-recomenda_trilha(ListaTrilhasRecomendadas) :-
-    listar_todas_pontuacoes(Lista),
-    max_lista_pontuacoes(Lista, PontuacaoMaxima),
-    findall(Trilha,
-            member(Trilha-PontuacaoMaxima, Lista),
-            ListaTrilhasRecomendadas).
+% O predicado 'recomenda_melhor_trilha' encontra a trilha com a
+% maior pontuação e sua descrição.
+recomenda_melhor_trilha(NomeTrilha, Descricao, PontuacaoTotal, Justificativas) :-
+    % 1. Coleta a pontuação de todas as trilhas.
+    findall(NomeTrilhaTemp-Pontos-Just,
+            ( pontuacao_trilha(NomeTrilhaTemp, Pontos, Just) ),
+            ListaPontuacoes),
+            
+    % 2. Encontra a trilha com a pontuação mais alta.
+    % Ordena a lista de pontuações em ordem decrescente.
+    % E unifica a 'NomeTrilha' e a 'PontuacaoTotal' com o primeiro item da lista (o mais alto).
+    sort(2, @>=, ListaPontuacoes,
+         [NomeTrilha-PontuacaoTotal-Justificativas | _]),
+         
+    % 3. Busca a descrição da trilha que foi recomendada.
+    trilha(NomeTrilha, Descricao).
