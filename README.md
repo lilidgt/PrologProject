@@ -64,9 +64,17 @@ Se precisar limpar respostas antes de rodar novamente:
     retractall(resposta(_, _)).
 
 ## Resultados Esperados
+Prints dos Resultados na pasta de Resultados:  
+  ![Interface + Iniciar](ResultadosPrints/interface+iniciar.jpeg)
+  ![Pontuação trilha](ResultadosPrints/pontuacao_trilha.jpeg)
+  ![Recomendação de melhor trilha](ResultadosPrints/recomendacao_melhor_trilha.jpeg)
+  ![Testes de todos os perfis](ResultadosPrints/testes_todosPerfis.jpeg)
+  ![Teste do perfil 1](ResultadosPrints/testes_perfil1.jpeg)
+  
 - perfil_1.pl -> empate entre desenvolvimento_software e desenvolvimento_web
 - perfil_2.pl -> recomendação: ux_ui_design
 - perfil_3.pl -> recomendação: inteligencia_artificial
 
 ## Github
 https://github.com/lilidgt/PrologProject
+
