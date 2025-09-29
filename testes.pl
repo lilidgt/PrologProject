@@ -18,20 +18,20 @@ carrega_perfil(ArquivoPerfil) :-
 ranking_trilhas(RankingOrdenado) :-
     findall(T-P,
         ( trilha(T,_),
-          pontuacao_trilha(T, P, _)  % antigo calcula_total_pontos/2 -> pontuacao_trilha/3
+          pontuacao_trilha(T, P, _) 
         ),
         Pares),
     sort(2, @>=, Pares, RankingOrdenado).
 
-% O predicado 'relatorio_perfil' gera o relatório final.
+% predicado 'relatorio_perfil' gera relatório final.
 relatorio_perfil(ArquivoPerfil) :-
-    % Carrega o arquivo de perfil.
+    %carrega arquivo de perfil.
     carrega_perfil(ArquivoPerfil),
 
-    % Obtém o ranking de todas as trilhas.
+    %pega ranking de todas as trilhas.
     ranking_trilhas(Rank),
 
-    % Imprime o cabeçalho e o ranking.
+    %imprime cabeçalho e ranking.
     format('~n--- RESULTADO para ~w ---\n', [ArquivoPerfil]),
     writeln('Ranking (alto -> baixo):'),
     forall(member(T-P, Rank), format(' - ~w: ~w pontos\n', [T,P])),
